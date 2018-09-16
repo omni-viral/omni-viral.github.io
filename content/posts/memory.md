@@ -3,17 +3,17 @@ title: "Working with device memory using Vulkan"
 date: 2018-09-16T21:48:34+02:00
 ---
 
-[Vulkan] (and other modern low-level APIs, such as DirectX 12) moves most of the complexity related to memory handling to the user's code.  
+[Vulkan] (and other modern low-level APIs, such as ***DirectX 12***) moves most of the complexity related to memory handling to the user's code.  
 The API provides a very small set of functions.  
-While this post focuses on the [Vulkan API], most ideas are applicable to DirectX 12 as well.
+While this post focuses on the [Vulkan API], most ideas are applicable to ***DirectX 12*** as well.
 
 # Heaps and types
 
-Device visible memory is provided by [Vulkan] implementation in few memory heaps.
-Each heap backs one or more memory types.
-One memory type is backed by one heap.
+*Device visible memory* is provided by [Vulkan] implementation in few *memory heaps*.
+Each heap backs one or more *memory types*.
+One memory type is backed by only one heap.
 When the memory is allocated from particular type it utilize capacity of backing heap.
-To obtain memory types and heaps of the physical device one should call `vkGetPhysicalDeviceMemoryProperties` function.
+To obtain memory types and heaps of the physical device one should call [`vkGetPhysicalDeviceMemoryProperties`] function.
 
 * **Note**: All logical devices created from same physical device will share memory heaps
 
@@ -22,7 +22,7 @@ There are following memory properties defined in [Vulkan API]:
 
 * [`VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT`] = `0x00000001`
   Memory with this property is fast for device access.
-  Only heap with `VK_MEMORY_HEAP_DEVICE_LOCAL_BIT` flag backs memory with this property.
+  Only heap with [`VK_MEMORY_HEAP_DEVICE_LOCAL_BIT`] flag backs memory with this property.
   Normally this flag should be set for memory that is physically on device.
   At least one memory type with this property is guaranteed to exist.
 
@@ -44,7 +44,7 @@ There are following memory properties defined in [Vulkan API]:
 
 * [`VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT`] = `0x00000010`
   Memory types with device-only access can have this property.
-  Which means that memory type can't have both [`VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT`] and `VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT` bits set.
+  Which means that memory type can't have both [`VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT`] and [`VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT`] bits set.
   This flags signals that backing memory **may** be provided lazily.
 
 * [`VK_MEMORY_PROPERTY_PROTECTED_BIT`] = `0x00000020`
@@ -120,19 +120,19 @@ More about this in following post about synchronization.
 Allocation and mapping strategies together gives us many different combinations.
 But most use cases fall in 4 major categories.
 
-* `Data`
+* **`Data`**
   Memory that is only accessed by device. This includes framebuffers, textures, meshes etc.
   For those resources one should use device local memory types. Avoid using host visible memory type as it is useful for another usage.
 
-* `Upload`
+* **`Upload`**
   To initialize textures and meshes staging technique requires host visible memory type.
   Avoid using device local and cached memory as it is useful for another usage. Host coherency is not really important here.
 
-* `Download`
+* **`Download`**
   Sometimes application needs to get result of computation done by device.
   It can be anything from captured frame to result of physics simulation done in compute shader.
 
-* `Dynamic`
+* **`Dynamic`**
   Some memory is expected to be rewritten by CPU each frame.
   Common use case is uniform buffers.
   For this usage host visible memory is required and device local memory preferred.
@@ -147,15 +147,15 @@ To associate memory range with particular resource it must be bound.
 Once bound to memory range resource can't be rebound to another.
 *This restriction doesn't apply to sparse resources. We'll talk about them later.*
 
-Yet it is possible to bind overlapping ranges to the multiple resources.
-When two resources are bound to overlapped ranges they are *alias* intersection of ranges.
-Usage if *aliased* memory is subject to several constraints.
-The only reason to *alias* memory is to reduce total memory usage.
+Yet it is possible to bind overlapping ranges *(and even same range)* to the multiple resources.
+When two resources are bound to overlapped ranges they are ***alias*** intersection of ranges.
+Usage if ***aliased*** memory is subject to several constraints.
+The only reason to ***alias*** memory is to reduce total memory usage.
 Unless [*specific constrains*] are met then data written through one alias cannot be consistently read through another.
 
-The simple use case for aliased memory is transient resources, e.g. resources that get rewritten each frame without trying to read it first.
+Common and simple use case for aliased memory is *transient resources*, e.g. resources that get rewritten each frame without trying to read it first.
 This is true for most framebuffer attachments as they usually cleared before first use.
-If last read from one transient resource is done before rewrite of second resource then it is safe to *alias* that pair of resources.
+If last read from one transient resource is done before rewrite of second resource then it is safe to ***alias*** that pair of resources.
 Properties of transient resources is known at setup time so it must be possible to allocate them in memory object with size smaller than total sum of size required by all transient resources.
 
 # Existing solutions
