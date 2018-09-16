@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Words about stuff</title>
+    <link>https://omni-viral.github.io/</link>
+    <description>Recent content on Words about stuff</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 16 Sep 2018 21:48:34 +0200</lastBuildDate>
+    
+	<atom:link href="https://omni-viral.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Memory</title>
+      <link>https://omni-viral.github.io/posts/memory/</link>
+      <pubDate>Sun, 16 Sep 2018 21:48:34 +0200</pubDate>
+      
+      <guid>https://omni-viral.github.io/posts/memory/</guid>
+      <description>Working with device memory using Vulkan Vulkan moves most of the complexity related to memory allocation to the user code, the API provides a very small set of functions to handle memory. This post has focus on the Vulkan API but most ideas are applicable to DirectX 12 as well.
+Memory allocation Device visible memory is provided in few memory heaps. Each heap backs one or more memory types. One memory type is backed by one heap.</description>
+    </item>
+    
+  </channel>
+</rss>

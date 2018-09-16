@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Words about stuff  | Memory</title>
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="generator" content="Hugo 0.48" />
+    
+    
+      <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+    
+
+    
+    
+      <link href="/dist/css/app.e08a958ae3e530145318b6373195c765.css" rel="stylesheet">
+    
+
+    
+
+    
+      
+    
+
+    
+
+    <meta property="og:title" content="Memory" />
+<meta property="og:description" content="Working with device memory using Vulkan Vulkan moves most of the complexity related to memory allocation to the user code, the API provides a very small set of functions to handle memory. This post has focus on the Vulkan API but most ideas are applicable to DirectX 12 as well.
+Memory allocation Device visible memory is provided in few memory heaps. Each heap backs one or more memory types. One memory type is backed by one heap." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://omni-viral.github.io/posts/memory/" /><meta property="article:published_time" content="2018-09-16T21:48:34&#43;02:00"/>
+<meta property="article:modified_time" content="2018-09-16T21:48:34&#43;02:00"/>
+<meta itemprop="name" content="Memory">
+<meta itemprop="description" content="Working with device memory using Vulkan Vulkan moves most of the complexity related to memory allocation to the user code, the API provides a very small set of functions to handle memory. This post has focus on the Vulkan API but most ideas are applicable to DirectX 12 as well.
+Memory allocation Device visible memory is provided in few memory heaps. Each heap backs one or more memory types. One memory type is backed by one heap.">
+
+
+<meta itemprop="datePublished" content="2018-09-16T21:48:34&#43;02:00" />
+<meta itemprop="dateModified" content="2018-09-16T21:48:34&#43;02:00" />
+<meta itemprop="wordCount" content="1421">
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Memory"/>
+<meta name="twitter:description" content="Working with device memory using Vulkan Vulkan moves most of the complexity related to memory allocation to the user code, the API provides a very small set of functions to handle memory. This post has focus on the Vulkan API but most ideas are applicable to DirectX 12 as well.
+Memory allocation Device visible memory is provided in few memory heaps. Each heap backs one or more memory types. One memory type is backed by one heap."/>
+
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="https://omni-viral.github.io/" class="f3 fw2 hover-white no-underline white-90 dib">
+      Words about stuff
+    </a>
+    <div class="flex-l items-center">
+      
+      
+
+
+
+
+
+
+
+
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  <article class="flex-l flex-wrap justify-between mw8 center ph3 ph0-l">
+
+    <header class="mt4 w-100">
+      <p class="f6 b helvetica tracked">
+          
+        POSTS
+      </p>
+      <h1 class="f1 athelas mb1">Memory</h1>
+      
+      <time class="f6 mv4 dib tracked" datetime="2018-09-16T21:48:34&#43;02:00">September 16, 2018</time>
+    </header>
+
+    <main class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l">
+
+<h1 id="working-with-device-memory-using-vulkan">Working with device memory using <a href="https://www.khronos.org/vulkan/">Vulkan</a></h1>
+
+<p><a href="and other modern low-level APIs, such as DirectX 12">Vulkan</a> moves most of the complexity related to memory allocation to the user code,
+the API provides a very small set of functions to handle memory.
+This post has focus on the <a href="https://www.khronos.org/registry/[vulkan]/specs/1.1-extensions/html/vkspec.html">Vulkan API</a> but most ideas are applicable to DirectX 12 as well.</p>
+
+<h2 id="memory-allocation">Memory allocation</h2>
+
+<p>Device visible memory is provided in few memory heaps.
+Each heap backs one or more memory types.
+One memory type is backed by one heap.
+When the memory is allocated from particular type it utilize capacity of backing heap.
+To obtain memory types and heaps of the physical device one should call <code>vkGetPhysicalDeviceMemoryProperties</code> function.</p>
+
+<p>*<strong>Note</strong>: All logical devices created from same physical device will share memory heaps*</p>
+
+<p>Memory type defines set of properties, that all memory objects allocated from the type will have.
+There are following memory properties defined in <a href="https://www.khronos.org/registry/[vulkan]/specs/1.1-extensions/html/vkspec.html">Vulkan API</a>:</p>
+
+<ul>
+<li><p><a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkMemoryPropertyFlagBits.html"><code>VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT</code></a> = <code>0x00000001</code>
+Memory with this property is fast for device access.
+Only heap with <code>VK_MEMORY_HEAP_DEVICE_LOCAL_BIT</code> flag backs memory with this property.
+Normally this flag should be set for memory that is physically on device.
+At least one memory type with this property is guaranteed to exist.</p></li>
+
+<li><p><a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkMemoryPropertyFlagBits.html"><code>VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT</code></a> = <code>0x00000002</code>
+Memory with this property set may be accessed by the host (CPU) via mapping mechanism.
+At least one memory type with this property is guaranteed to exist.
+Not all devices will have memory types which are both device-local and host-visible.</p></li>
+
+<li><p><a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkMemoryPropertyFlagBits.html"><code>VK_MEMORY_PROPERTY_HOST_COHERENT_BIT</code></a> = <code>0x00000004</code>
+Memory with this property is always host-visible.
+The property signals that host access to the memory is coherent.
+Which in tuns means that there is no need to manually invalidate and flush mapped range.
+In many implementations all host visible is coherent.</p></li>
+
+<li><p><a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkMemoryPropertyFlagBits.html"><code>VK_MEMORY_PROPERTY_HOST_CACHED_BIT</code></a> = <code>0x00000008</code>
+Memory with this property is always host-visible.
+This property signals that memory is cached on the host.
+Host access to the uncached memory is slower.</p></li>
+
+<li><p><a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkMemoryPropertyFlagBits.html"><code>VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT</code></a> = <code>0x00000010</code>
+Memory types with device-only access can have this property.
+Which means that memory type can&rsquo;t have both <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkMemoryPropertyFlagBits.html"><code>VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT</code></a> and <code>VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT</code> bits set.
+This flags signals that backing memory <strong>may</strong> be provided lazily.</p></li>
+
+<li><p><a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkMemoryPropertyFlagBits.html"><code>VK_MEMORY_PROPERTY_PROTECTED_BIT</code></a> = <code>0x00000020</code>
+Memory types with device-only access can have this property.
+Which means that memory type can&rsquo;t have both <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkMemoryPropertyFlagBits.html"><code>VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT</code></a> and <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkMemoryPropertyFlagBits.html"><code>VK_MEMORY_PROPERTY_PROTECTED_BIT</code></a> bits set.
+This property specifies that protected queue operations to access the memory (whatever this means).</p></li>
+</ul>
+
+<p>User allocates memory objects with <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkAllocateMemory.html"><code>vkAllocateMemory</code></a> function specifying memory type and size of the memory required. The function returns memory in form of an opaque handle to the memory object.</p>
+
+<p>The task to choose best memory type for each resource is now put on shoulders of the user.<br />
+<em>Don&rsquo;t panic.</em><br />
+It is not as hard as it may seem.<br />
+After creating resource user can obtain subset of memory types that can be used for resource using
+<a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkGetBufferMemoryRequirements.html"><code>vkGetBufferMemoryRequirements</code></a> or <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkGetImageMemoryRequirements.html"><code>vkGetImageMemoryRequirements</code></a>.<br />
+Then it just a matter of picking memory type with all required properties, with as many as possible preferred properties, and
+with as little as possible irrelevant properties. Also user should consider how much memory left in heaps.<br />
+Simple solution would look like this:</p>
+
+<ul>
+<li>Filter out memory types that doesn&rsquo;t support resource.</li>
+<li>Filter out memory types which heap is oversubscribed.</li>
+<li>Filter out memory types without required properties.</li>
+<li>For memory types left find one with maximum fitting value that can be calculated as weighted sum of properties.
+Weight for desired property can be specified by user or positive preset value.
+Weight for irrelevant property can be negative preset value.</li>
+</ul>
+
+<p><a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkAllocateMemory.html"><code>vkAllocateMemory</code></a> is really expensive and implementation may allocate small amount of memory objects.
+One can obtain that amount but it only guaranteed to be at least 2048.
+It is strongly advised to allocate big chunks of memory with this function and use it to bind to the multiple buffers and images.
+For start it can be allocations of 256 MiB (or <sup>1</sup>&frasl;<sub>8</sub> of heap size for small heaps).
+Dedicated memory objects could be used for resources that require &gt; 32 MiB.</p>
+
+<p>Manual allocation of memory opens possibility to utilize higher-level knowledge of memory usage pattern to use allocation strategy that fits best.
+For example one can use linear allocator for short-lived objects.</p>
+
+<p>To free memory object user should call <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkFreeMemory.html"><code>vkFreeMemory</code></a>. User must ensure that device won&rsquo;t access freed memory.</p>
+
+<h2 id="host-access">Host access</h2>
+
+<p>As mentioned before <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkAllocateMemory.html"><code>vkAllocateMemory</code></a> returns opaque handle to newly allocated memory object.
+The actual physical memory may not be CPU accessible RAM.
+But if memory type has <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkMemoryPropertyFlagBits.html"><code>VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT</code></a> it may be mapped for direct CPU access.
+<a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkMapMemory.html"><code>vkMapMemory</code></a> function maps specified range of the host visible memory to the virtual memory accessible by CPU.
+Memory range remains mapped until <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkUnmapMemory.html"><code>vkUnmapMemory</code></a> is called for the memory object.</p>
+
+<p>Only one range of the memory object can be mapped at a time.
+This leads to two primary mapping strategy:</p>
+
+<ul>
+<li><p>Map - use - unmap
+Region of host visible memory is mapped to perform write or read by CPU and immediately unmapped afterwards.
+This strategy has performance cost as mapping memory may require pages to be allocated.
+But reduces RAM usage.</p></li>
+
+<li><p>Persistent mapping
+Whole memory object is mapped after allocation and unmapped before deallocation.
+This strategy doesn&rsquo;t require unnecessary ticks to map-unmap constantly.
+But greatly increase RAM usage.</p></li>
+</ul>
+
+<p>In general user should pick suitable approach for each use case.
+It is better to avoid map-unmap approach for uniforms as it may lead to thousands mapping operations per frame.
+Short-lived mapping can also prove difficult for multi-threaded usage as application will require to ensure
+that no other thread tries to map another memory region.</p>
+
+<p>If host visible memory doesn&rsquo;t have <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkMemoryPropertyFlagBits.html"><code>VK_MEMORY_PROPERTY_HOST_COHERENT_BIT</code></a> property then
+<a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkInvalidateMappedMemoryRanges.html"><code>vkInvalidateMappedMemoryRanges</code></a> function must be used on memory range before read by CPU,
+otherwise writes made by GPU are not guaranteed to be visible by CPU.
+Similarly <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkFlushMappedMemoryRanges.html"><code>vkFlushMappedMemoryRanges</code></a> must be used after CPU writes.
+More about this in following post about synchronization.</p>
+
+<h2 id="usage">Usage</h2>
+
+<p>Allocation and mapping strategies together gives us many different combinations.
+But most use cases fall in 4 major categories.</p>
+
+<ul>
+<li><p><code>Data</code>
+Memory that is only accessed by device. This includes framebuffers, textures, meshes etc.
+For those resources one should use device local memory types. Avoid using host visible memory type as it is useful for another usage.</p></li>
+
+<li><p><code>Upload</code>
+To initialize textures and meshes staging technique requires host visible memory type.
+Avoid using device local and cached memory as it is useful for another usage. Host coherency is not really important here.</p></li>
+
+<li><p><code>Download</code>
+Sometimes application needs to get result of computation done by device.
+It can be anything from captured frame to result of physics simulation done in compute shader.</p></li>
+
+<li><p><code>Dynamic</code>
+Some memory is expected to be rewritten by CPU each frame.
+Common use case is uniform buffers.
+For this usage host visible memory is required and device local memory preferred.
+Not all GPUs has a memory type that is both host visible and device local.
+And even if such memory type exists its heap is relatively small, so it shouldn&rsquo;t be wasted for usages that doesn&rsquo;t require both properties.</p></li>
+</ul>
+
+<h2 id="binding-and-aliasing">Binding and aliasing</h2>
+
+<p>To associate memory range with particular resource it must be bound.
+<a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkBindBufferMemory.html"><code>vkBindBufferMemory</code></a> function binds specified memory range to the buffer.
+<a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkBindImageMemory.html"><code>vkBindImageMemory</code></a> function binds specified memory range to the image.
+Once bound to memory range resource can&rsquo;t be rebound to another.
+<em>This restriction doesn&rsquo;t apply to sparse resources. We&rsquo;ll talk about them later.</em></p>
+
+<p>Yet it is possible to bind overlapping ranges to the multiple resources.
+When two resources are bound to overlapped ranges they are <em>alias</em> intersection of ranges.
+Usage if <em>aliased</em> memory is subject to several constraints.
+The only reason to <em>alias</em> memory is to reduce total memory usage.
+Unless <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#resources-memory-aliasing"><em>specific constrains</em></a> are met then data written through one alias cannot be consistently read through another.</p>
+
+<p>The simple use case for aliased memory is transient resources, e.g. resources that get rewritten each frame without trying to read it first.
+This is true for most framebuffer attachments as they usually cleared before first use.
+If last read from one transient resource is done before rewrite of second resource then it is safe to <em>alias</em> that pair of resources.
+Properties of transient resources is known at setup time so it must be possible to allocate them in memory object with size smaller than total sum of size required by all transient resources.</p>
+
+<h2 id="solutions">Solutions</h2>
+
+<p>For those who don&rsquo;t want to reinvent the wheel there are libraries to solve the task.</p>
+
+<p>If you write in C or C++, or just want to use library with C API you can try <a href="https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator">VulkanMemoryAllocator</a>.</p>
+
+<p>Rust folks who use <a href="https://github.com/gfx-rs/gfx">gfx-hal</a> can try <a href="https://github.com/gfx-rs/gfx-memory">gfx-memory</a>.
+For <a href="https://github.com/MaikKlein/ash">ash</a> users and those who like new shiny stuff <a href="https://github.com/omni-viral/rendy">Rendy</a>&rsquo;s memory manager could be of interest.</p>
+<ul class="pa0">
+  
+</ul>
+<div class="mt6">
+        
+      </div>
+    </main>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-near-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://omni-viral.github.io/" >
+    &copy; 2018 Words about stuff
+  </a>
+    <div>
+
+
+
+
+
+
+
+
+</div>
+  </div>
+</footer>
+
+    
+
+  <script src="/dist/js/app.3fc0f988d21662902933.js"></script>
+
+
+  </body>
+</html>
