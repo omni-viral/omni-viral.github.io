@@ -1,0 +1,4 @@
+baseURL = "https://omni-viral.github.io/"
+languageCode = "en-us"
+title = "Words about stuff"
+theme = "ananke"
