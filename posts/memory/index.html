@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     
-    <title>Words about stuff  | Memory</title>
+    <title>Words about stuff  | Working with device memory using Vulkan</title>
     <meta name="HandheldFriendly" content="True">
     <meta name="MobileOptimized" content="320">
 
@@ -28,28 +28,34 @@
 
     
 
-    <meta property="og:title" content="Memory" />
-<meta property="og:description" content="Working with device memory using Vulkan Vulkan moves most of the complexity related to memory allocation to the user code, the API provides a very small set of functions to handle memory. This post has focus on the Vulkan API but most ideas are applicable to DirectX 12 as well.
-Memory allocation Device visible memory is provided in few memory heaps. Each heap backs one or more memory types. One memory type is backed by one heap." />
+    <meta property="og:title" content="Working with device memory using Vulkan" />
+<meta property="og:description" content="Vulkan moves most of the complexity related to memory handling to the user&rsquo;s code.
+The API provides a very small set of functions.
+While this post focuses on the Vulkan API, most ideas are applicable to DirectX 12 as well.
+Heaps and types Device visible memory is provided by Vulkan implementation in few memory heaps. Each heap backs one or more memory types. One memory type is backed by one heap." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://omni-viral.github.io/posts/memory/" /><meta property="article:published_time" content="2018-09-16T21:48:34&#43;02:00"/>
 <meta property="article:modified_time" content="2018-09-16T21:48:34&#43;02:00"/>
-<meta itemprop="name" content="Memory">
-<meta itemprop="description" content="Working with device memory using Vulkan Vulkan moves most of the complexity related to memory allocation to the user code, the API provides a very small set of functions to handle memory. This post has focus on the Vulkan API but most ideas are applicable to DirectX 12 as well.
-Memory allocation Device visible memory is provided in few memory heaps. Each heap backs one or more memory types. One memory type is backed by one heap.">
+<meta itemprop="name" content="Working with device memory using Vulkan">
+<meta itemprop="description" content="Vulkan moves most of the complexity related to memory handling to the user&rsquo;s code.
+The API provides a very small set of functions.
+While this post focuses on the Vulkan API, most ideas are applicable to DirectX 12 as well.
+Heaps and types Device visible memory is provided by Vulkan implementation in few memory heaps. Each heap backs one or more memory types. One memory type is backed by one heap.">
 
 
 <meta itemprop="datePublished" content="2018-09-16T21:48:34&#43;02:00" />
 <meta itemprop="dateModified" content="2018-09-16T21:48:34&#43;02:00" />
-<meta itemprop="wordCount" content="1421">
+<meta itemprop="wordCount" content="1465">
 
 
 
 <meta itemprop="keywords" content="" />
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Memory"/>
-<meta name="twitter:description" content="Working with device memory using Vulkan Vulkan moves most of the complexity related to memory allocation to the user code, the API provides a very small set of functions to handle memory. This post has focus on the Vulkan API but most ideas are applicable to DirectX 12 as well.
-Memory allocation Device visible memory is provided in few memory heaps. Each heap backs one or more memory types. One memory type is backed by one heap."/>
+<meta name="twitter:title" content="Working with device memory using Vulkan"/>
+<meta name="twitter:description" content="Vulkan moves most of the complexity related to memory handling to the user&rsquo;s code.
+The API provides a very small set of functions.
+While this post focuses on the Vulkan API, most ideas are applicable to DirectX 12 as well.
+Heaps and types Device visible memory is provided by Vulkan implementation in few memory heaps. Each heap backs one or more memory types. One memory type is backed by one heap."/>
 
   </head>
 
@@ -96,28 +102,28 @@ Memory allocation Device visible memory is provided in few memory heaps. Each he
           
         POSTS
       </p>
-      <h1 class="f1 athelas mb1">Memory</h1>
+      <h1 class="f1 athelas mb1">Working with device memory using Vulkan</h1>
       
       <time class="f6 mv4 dib tracked" datetime="2018-09-16T21:48:34&#43;02:00">September 16, 2018</time>
     </header>
 
     <main class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l">
 
-<h1 id="working-with-device-memory-using-vulkan">Working with device memory using <a href="https://www.khronos.org/vulkan/">Vulkan</a></h1>
+<p><a href="and other modern low-level APIs, such as DirectX 12">Vulkan</a> moves most of the complexity related to memory handling to the user&rsquo;s code.<br />
+The API provides a very small set of functions.<br />
+While this post focuses on the <a href="https://www.khronos.org/registry/[vulkan]/specs/1.1-extensions/html/vkspec.html">Vulkan API</a>, most ideas are applicable to DirectX 12 as well.</p>
 
-<p><a href="and other modern low-level APIs, such as DirectX 12">Vulkan</a> moves most of the complexity related to memory allocation to the user code,
-the API provides a very small set of functions to handle memory.
-This post has focus on the <a href="https://www.khronos.org/registry/[vulkan]/specs/1.1-extensions/html/vkspec.html">Vulkan API</a> but most ideas are applicable to DirectX 12 as well.</p>
+<h1 id="heaps-and-types">Heaps and types</h1>
 
-<h2 id="memory-allocation">Memory allocation</h2>
-
-<p>Device visible memory is provided in few memory heaps.
+<p>Device visible memory is provided by <a href="https://www.khronos.org/vulkan/">Vulkan</a> implementation in few memory heaps.
 Each heap backs one or more memory types.
 One memory type is backed by one heap.
 When the memory is allocated from particular type it utilize capacity of backing heap.
 To obtain memory types and heaps of the physical device one should call <code>vkGetPhysicalDeviceMemoryProperties</code> function.</p>
 
-<p>*<strong>Note</strong>: All logical devices created from same physical device will share memory heaps*</p>
+<ul>
+<li><strong>Note</strong>: All logical devices created from same physical device will share memory heaps</li>
+</ul>
 
 <p>Memory type defines set of properties, that all memory objects allocated from the type will have.
 There are following memory properties defined in <a href="https://www.khronos.org/registry/[vulkan]/specs/1.1-extensions/html/vkspec.html">Vulkan API</a>:</p>
@@ -156,6 +162,8 @@ Which means that memory type can&rsquo;t have both <a href="https://www.khronos.
 This property specifies that protected queue operations to access the memory (whatever this means).</p></li>
 </ul>
 
+<h1 id="allocation">Allocation</h1>
+
 <p>User allocates memory objects with <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkAllocateMemory.html"><code>vkAllocateMemory</code></a> function specifying memory type and size of the memory required. The function returns memory in form of an opaque handle to the memory object.</p>
 
 <p>The task to choose best memory type for each resource is now put on shoulders of the user.<br />
@@ -167,14 +175,17 @@ Then it just a matter of picking memory type with all required properties, with 
 with as little as possible irrelevant properties. Also user should consider how much memory left in heaps.<br />
 Simple solution would look like this:</p>
 
+<ol>
+<li><em>Filter out memory types that doesn&rsquo;t support resource.</em></li>
+<li><em>Filter out memory types which heap is oversubscribed.</em></li>
+<li><em>Filter out memory types without required properties.</em></li>
+<li><em>For memory types left find one with maximum fitting value that can be calculated as weighted sum of properties.</em>
+
 <ul>
-<li>Filter out memory types that doesn&rsquo;t support resource.</li>
-<li>Filter out memory types which heap is oversubscribed.</li>
-<li>Filter out memory types without required properties.</li>
-<li>For memory types left find one with maximum fitting value that can be calculated as weighted sum of properties.
-Weight for desired property can be specified by user or positive preset value.
-Weight for irrelevant property can be negative preset value.</li>
-</ul>
+<li><em>Weight for desired property can be specified by user or positive preset value.</em></li>
+<li><em>Weight for irrelevant property can be negative preset value.</em></li>
+</ul></li>
+</ol>
 
 <p><a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkAllocateMemory.html"><code>vkAllocateMemory</code></a> is really expensive and implementation may allocate small amount of memory objects.
 One can obtain that amount but it only guaranteed to be at least 2048.
@@ -187,7 +198,7 @@ For example one can use linear allocator for short-lived objects.</p>
 
 <p>To free memory object user should call <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkFreeMemory.html"><code>vkFreeMemory</code></a>. User must ensure that device won&rsquo;t access freed memory.</p>
 
-<h2 id="host-access">Host access</h2>
+<h1 id="host-access">Host access</h1>
 
 <p>As mentioned before <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkAllocateMemory.html"><code>vkAllocateMemory</code></a> returns opaque handle to newly allocated memory object.
 The actual physical memory may not be CPU accessible RAM.
@@ -221,7 +232,7 @@ otherwise writes made by GPU are not guaranteed to be visible by CPU.
 Similarly <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkFlushMappedMemoryRanges.html"><code>vkFlushMappedMemoryRanges</code></a> must be used after CPU writes.
 More about this in following post about synchronization.</p>
 
-<h2 id="usage">Usage</h2>
+<h1 id="usage">Usage</h1>
 
 <p>Allocation and mapping strategies together gives us many different combinations.
 But most use cases fall in 4 major categories.</p>
@@ -247,7 +258,7 @@ Not all GPUs has a memory type that is both host visible and device local.
 And even if such memory type exists its heap is relatively small, so it shouldn&rsquo;t be wasted for usages that doesn&rsquo;t require both properties.</p></li>
 </ul>
 
-<h2 id="binding-and-aliasing">Binding and aliasing</h2>
+<h1 id="binding-and-aliasing">Binding and aliasing</h1>
 
 <p>To associate memory range with particular resource it must be bound.
 <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkBindBufferMemory.html"><code>vkBindBufferMemory</code></a> function binds specified memory range to the buffer.
@@ -266,7 +277,7 @@ This is true for most framebuffer attachments as they usually cleared before fir
 If last read from one transient resource is done before rewrite of second resource then it is safe to <em>alias</em> that pair of resources.
 Properties of transient resources is known at setup time so it must be possible to allocate them in memory object with size smaller than total sum of size required by all transient resources.</p>
 
-<h2 id="solutions">Solutions</h2>
+<h1 id="existing-solutions">Existing solutions</h1>
 
 <p>For those who don&rsquo;t want to reinvent the wheel there are libraries to solve the task.</p>
 
@@ -274,6 +285,20 @@ Properties of transient resources is known at setup time so it must be possible 
 
 <p>Rust folks who use <a href="https://github.com/gfx-rs/gfx">gfx-hal</a> can try <a href="https://github.com/gfx-rs/gfx-memory">gfx-memory</a>.
 For <a href="https://github.com/MaikKlein/ash">ash</a> users and those who like new shiny stuff <a href="https://github.com/omni-viral/rendy">Rendy</a>&rsquo;s memory manager could be of interest.</p>
+
+<h1 id="what-s-left-out-of-scope">What&rsquo;s left out of scope</h1>
+
+<ul>
+<li><p>Multi-device
+Memory allocation for multiple physical devices is not a topic for first post :)</p></li>
+
+<li><p>Sparse resources
+require sophisticated memory binding while this topic is more about allocation.</p></li>
+
+<li><p>Synchronization
+requires setting up correct memory dependency.<br />
+Will be further explained in post about synchronization.</p></li>
+</ul>
 <ul class="pa0">
   
 </ul>
