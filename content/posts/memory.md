@@ -1,23 +1,21 @@
 ---
-title: "Memory"
+title: "Working with device memory using Vulkan"
 date: 2018-09-16T21:48:34+02:00
 ---
 
-# Working with device memory using [Vulkan]
+[Vulkan] (and other modern low-level APIs, such as DirectX 12) moves most of the complexity related to memory handling to the user's code.  
+The API provides a very small set of functions.  
+While this post focuses on the [Vulkan API], most ideas are applicable to DirectX 12 as well.
 
-[Vulkan] (and other modern low-level APIs, such as DirectX 12) moves most of the complexity related to memory allocation to the user code,
-the API provides a very small set of functions to handle memory.
-This post has focus on the [Vulkan API] but most ideas are applicable to DirectX 12 as well.
+# Heaps and types
 
-## Memory allocation
-
-Device visible memory is provided in few memory heaps.
+Device visible memory is provided by [Vulkan] implementation in few memory heaps.
 Each heap backs one or more memory types.
 One memory type is backed by one heap.
 When the memory is allocated from particular type it utilize capacity of backing heap.
 To obtain memory types and heaps of the physical device one should call `vkGetPhysicalDeviceMemoryProperties` function.
-  
-***Note**: All logical devices created from same physical device will share memory heaps*
+
+* **Note**: All logical devices created from same physical device will share memory heaps
 
 Memory type defines set of properties, that all memory objects allocated from the type will have.
 There are following memory properties defined in [Vulkan API]:
@@ -54,6 +52,8 @@ There are following memory properties defined in [Vulkan API]:
   Which means that memory type can't have both [`VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT`] and [`VK_MEMORY_PROPERTY_PROTECTED_BIT`] bits set.
   This property specifies that protected queue operations to access the memory (whatever this means).
 
+# Allocation
+
 User allocates memory objects with [`vkAllocateMemory`] function specifying memory type and size of the memory required. The function returns memory in form of an opaque handle to the memory object.
 
 The task to choose best memory type for each resource is now put on shoulders of the user.  
@@ -65,12 +65,12 @@ Then it just a matter of picking memory type with all required properties, with 
 with as little as possible irrelevant properties. Also user should consider how much memory left in heaps.  
 Simple solution would look like this:
 
-* Filter out memory types that doesn't support resource.
-* Filter out memory types which heap is oversubscribed.
-* Filter out memory types without required properties.
-* For memory types left find one with maximum fitting value that can be calculated as weighted sum of properties.
-  Weight for desired property can be specified by user or positive preset value.
-  Weight for irrelevant property can be negative preset value.
+1. *Filter out memory types that doesn't support resource.*
+1. *Filter out memory types which heap is oversubscribed.*
+1. *Filter out memory types without required properties.*
+1. *For memory types left find one with maximum fitting value that can be calculated as weighted sum of properties.*
+  * *Weight for desired property can be specified by user or positive preset value.*
+  * *Weight for irrelevant property can be negative preset value.*
 
 [`vkAllocateMemory`] is really expensive and implementation may allocate small amount of memory objects.
 One can obtain that amount but it only guaranteed to be at least 2048.
@@ -83,7 +83,7 @@ For example one can use linear allocator for short-lived objects.
 
 To free memory object user should call [`vkFreeMemory`]. User must ensure that device won't access freed memory.
 
-## Host access
+# Host access
 
 As mentioned before [`vkAllocateMemory`] returns opaque handle to newly allocated memory object.
 The actual physical memory may not be CPU accessible RAM.
@@ -115,7 +115,7 @@ otherwise writes made by GPU are not guaranteed to be visible by CPU.
 Similarly [`vkFlushMappedMemoryRanges`] must be used after CPU writes.
 More about this in following post about synchronization.
 
-## Usage
+# Usage
 
 Allocation and mapping strategies together gives us many different combinations.
 But most use cases fall in 4 major categories.
@@ -139,7 +139,7 @@ But most use cases fall in 4 major categories.
   Not all GPUs has a memory type that is both host visible and device local.
   And even if such memory type exists its heap is relatively small, so it shouldn't be wasted for usages that doesn't require both properties.
 
-## Binding and aliasing
+# Binding and aliasing
 
 To associate memory range with particular resource it must be bound.
 [`vkBindBufferMemory`] function binds specified memory range to the buffer.
@@ -158,7 +158,7 @@ This is true for most framebuffer attachments as they usually cleared before fir
 If last read from one transient resource is done before rewrite of second resource then it is safe to *alias* that pair of resources.
 Properties of transient resources is known at setup time so it must be possible to allocate them in memory object with size smaller than total sum of size required by all transient resources.
 
-## Solutions
+# Existing solutions
 
 For those who don't want to reinvent the wheel there are libraries to solve the task.
 
@@ -166,6 +166,18 @@ If you write in C or C++, or just want to use library with C API you can try [Vu
 
 Rust folks who use [gfx-hal] can try [gfx-memory].
 For [ash] users and those who like new shiny stuff [Rendy]'s memory manager could be of interest.
+
+# What's left out of scope
+
+* Multi-device
+  Memory allocation for multiple physical devices is not a topic for first post :)
+
+* Sparse resources
+  require sophisticated memory binding while this topic is more about allocation.
+
+* Synchronization
+  requires setting up correct memory dependency.  
+  Will be further explained in post about synchronization.
 
 [Vulkan]: https://www.khronos.org/vulkan/
 [Vulkan API]: https://www.khronos.org/registry/[vulkan]/specs/1.1-extensions/html/vkspec.html
@@ -192,4 +204,3 @@ For [ash] users and those who like new shiny stuff [Rendy]'s memory manager coul
 [gfx-memory]: https://github.com/gfx-rs/gfx-memory
 [ash]: https://github.com/MaikKlein/ash
 [Rendy]: https://github.com/omni-viral/rendy
-
